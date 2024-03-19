@@ -142,7 +142,7 @@ impl Iceberg {
     pub const LIBRARY: &'static str = include_str!("compiler/library.html");
     pub const EMBED: &'static str = include_str!("compiler/embed.html");
 
-    pub fn embed(&self) -> String {
+    pub fn embed(&self, height: Option<&str>) -> String {
         static COUNT: AtomicU64 = AtomicU64::new(0);
 
         Self::EMBED
@@ -151,6 +151,7 @@ impl Iceberg {
                 "{{ ID }}",
                 &COUNT.fetch_add(1, atomic::Ordering::Relaxed).to_string(),
             )
+            .replace("{{ HEIGHT }}", height.unwrap_or("200px"))
     }
 }
 

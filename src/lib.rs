@@ -69,7 +69,10 @@ fn process_chapter(
 
     let groups = events.group_by(|event| match event {
         Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(label)))
-            if label.starts_with("rust") && label.split(",").any(|modifier| modifier == "iced") =>
+            if label.starts_with("rust")
+                && label
+                    .split(",")
+                    .any(|modifier| modifier.starts_with("iced")) =>
         {
             in_iced_code = true;
             true
@@ -85,6 +88,7 @@ fn process_chapter(
     });
 
     let mut icebergs = Vec::new();
+    let mut heights = Vec::new();
     let mut is_first = true;
 
     let output = groups.into_iter().flat_map(|(is_iced_code, group)| {
@@ -92,8 +96,23 @@ fn process_chapter(
             let mut events = Vec::new();
 
             for event in group {
-                if let Event::Start(_) = &event {
+                if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(label))) = &event {
+                    let height = label
+                        .split(',')
+                        .find(|modifier| modifier.starts_with("iced"))
+                        .and_then(|modifier| {
+                            Some(
+                                modifier
+                                    .strip_prefix("iced(")?
+                                    .strip_suffix(")")?
+                                    .split_once("height=")?
+                                    .1
+                                    .to_string(),
+                            )
+                        });
+
                     icebergs.push(None);
+                    heights.push(height);
                     events.push(event);
                 } else if let Event::Text(code) = &event {
                     if let Ok(iceberg) = compiler.compile(code) {
@@ -113,7 +132,11 @@ fn process_chapter(
                     }
 
                     if let Some(iceberg) = icebergs.last().map(Option::as_ref).flatten() {
-                        events.push(Event::InlineHtml(iceberg.embed().into()));
+                        events.push(Event::InlineHtml(
+                            iceberg
+                                .embed(heights.last().map(Option::as_deref).flatten())
+                                .into(),
+                        ));
                     }
                 } else {
                     events.push(event);
