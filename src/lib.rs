@@ -3,6 +3,7 @@ use mdbook::errors::Error;
 use mdbook::preprocess::PreprocessorContext;
 use semver::{Version, VersionReq};
 
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -34,16 +35,24 @@ pub fn run(mut book: Book, context: &PreprocessorContext) -> Result<Book, Error>
         .ok_or(Error::msg("`rev` field should be a string"))?;
 
     let crate_ = set_up_build_crate(&context.root, revision)?;
+    let mut hashes = BTreeSet::new();
 
     for section in &mut book.sections {
         if let BookItem::Chapter(chapter) = section {
-            chapter.content = process_chapter(&crate_, chapter)?;
+            let (content, new_hashes) = process_chapter(&crate_, chapter)?;
+
+            chapter.content = content;
+            hashes.extend(new_hashes);
         }
     }
 
     let output_dir = context.root.join("src").join("icebergs");
 
     fs::create_dir_all(&output_dir)?;
+
+    clean_output_dir(&crate_.output, &hashes)?;
+    clean_output_dir(&output_dir, &hashes)?;
+
     copy_dir_all(&crate_.output, output_dir)?;
 
     Ok(book)
@@ -83,7 +92,7 @@ fn set_up_build_crate(root: &Path, revision: &str) -> Result<Crate, Error> {
     })
 }
 
-fn process_chapter(crate_: &Crate, chapter: &Chapter) -> Result<String, Error> {
+fn process_chapter(crate_: &Crate, chapter: &Chapter) -> Result<(String, BTreeSet<Hash>), Error> {
     use itertools::Itertools;
     use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
     use pulldown_cmark_to_cmark::cmark;
@@ -109,7 +118,7 @@ fn process_chapter(crate_: &Crate, chapter: &Chapter) -> Result<String, Error> {
         _ => in_iced_code,
     });
 
-    let mut hashes = Vec::new();
+    let mut hashes = BTreeSet::new();
 
     let output = groups.into_iter().flat_map(|(is_iced_code, group)| {
         if is_iced_code {
@@ -118,7 +127,7 @@ fn process_chapter(crate_: &Crate, chapter: &Chapter) -> Result<String, Error> {
             if let Some(Event::Text(code)) = parts.get(1) {
                 match compile(crate_, code) {
                     Ok(hash) => {
-                        hashes.push(hash.clone());
+                        hashes.insert(hash.clone());
 
                         Box::new(
                             parts
@@ -139,7 +148,7 @@ fn process_chapter(crate_: &Crate, chapter: &Chapter) -> Result<String, Error> {
     let mut content = String::with_capacity(chapter.content.len());
     let _ = cmark(output, &mut content)?;
 
-    Ok(content)
+    Ok((content, hashes))
 }
 
 fn compile(crate_: &Crate, code: &str) -> Result<Hash, Error> {
@@ -188,11 +197,23 @@ fn compile(crate_: &Crate, code: &str) -> Result<Hash, Error> {
     Ok(hash)
 }
 
+fn clean_output_dir(dir: &Path, hashes: &BTreeSet<Hash>) -> Result<(), Error> {
+    let deleted = fs::read_dir(dir)?
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| !hashes.iter().any(|hash| hash.as_str() == entry.file_name()));
+
+    for entry in deleted {
+        fs::remove_dir_all(entry.path())?;
+    }
+
+    Ok(())
+}
+
 fn embed(hash: Hash) -> String {
     SCRIPT.replace("{{ HASH }}", hash.as_str()).to_string()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 struct Hash(String);
 
 impl Hash {
@@ -218,11 +239,12 @@ fn copy_dir_all(from: impl AsRef<Path>, to: impl AsRef<Path>) -> Result<(), Erro
 
     for entry in fs::read_dir(from)? {
         let entry = entry?;
+        let target = to.as_ref().join(entry.file_name());
 
         if entry.file_type()?.is_dir() {
-            copy_dir_all(entry.path(), to.as_ref().join(entry.file_name()))?;
-        } else {
-            fs::copy(entry.path(), to.as_ref().join(entry.file_name()))?;
+            copy_dir_all(entry.path(), target)?;
+        } else if !target.exists() {
+            fs::copy(entry.path(), target)?;
         }
     }
 

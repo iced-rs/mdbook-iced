@@ -9,7 +9,7 @@ use std::process;
 
 fn main() -> Result<(), Error> {
     let command = Command::new("mdbook-iced")
-        .about("An mdBook preprocessor to embed iced code blocks as interactive Wasm applications")
+        .about("An mdBook preprocessor to turn iced code blocks into playable Wasm applications")
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
