@@ -63,7 +63,7 @@ impl Compiler {
             .join("\n");
 
         let hash = Hash(
-            Sha256::digest(&code)
+            Sha256::digest(&format!("{code}{}", self.hash))
                 .into_iter()
                 .map(|byte| format!("{byte:x}"))
                 .join(""),
