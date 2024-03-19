@@ -1,10 +1,11 @@
-<script type="module" id="iceberg-script-{{ HASH }}">
-  import init from './.icebergs/{{ HASH }}/iceberg.js';
+<script>
+function embed(script, hash) {
+  var code = script.previousSibling;
 
-  let me = document.getElementById('iceberg-script-{{ HASH }}');
+  while(code && code.tagName != "PRE") {
+    code = code.previousSibling;
+  }
 
-  // TODO: Find a more reliable way to find the code block
-  let code = me.previousSibling.previousSibling;
   let buttons = code.querySelector('.buttons');
   let play = document.createElement('button');
 
@@ -13,14 +14,18 @@
 
     let example = document.createElement('div');
     example.style.height = "300px";
+    example.style.padding = "1rem";
+    example.classList.add('hljs');
 
     let iced = document.createElement('div');
     iced.id = 'iced';
+    iced.append(document.createTextNode('Loading...'));
 
     example.append(iced);
     code.append(example);
 
-    await init();
+    let iceberg = await import(`./.icebergs/${hash}/iceberg.js`);
+    await iceberg.default();
   }
 
   play.title = 'Run example';
@@ -30,4 +35,5 @@
   play.classList.add('fa-play');
 
   buttons.prepend(play);
+}
 </script>

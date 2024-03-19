@@ -85,6 +85,7 @@ fn process_chapter(
     });
 
     let mut icebergs = Vec::new();
+    let mut is_first = true;
 
     let output = groups.into_iter().flat_map(|(is_iced_code, group)| {
         if is_iced_code {
@@ -104,6 +105,12 @@ fn process_chapter(
                     events.push(event);
                 } else if let Event::End(TagEnd::CodeBlock) = &event {
                     events.push(event);
+
+                    if is_first {
+                        is_first = false;
+
+                        events.push(Event::InlineHtml(compiler::Iceberg::LIBRARY.into()));
+                    }
 
                     if let Some(iceberg) = icebergs.last().map(Option::as_ref).flatten() {
                         events.push(Event::InlineHtml(iceberg.embed().into()));

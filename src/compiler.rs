@@ -4,6 +4,7 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process;
+use std::sync::atomic::{self, AtomicU64};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Compiler {
@@ -15,6 +16,8 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn set_up(root: impl AsRef<Path>, reference: Reference) -> Result<Self, Error> {
+        const CARGO_TOML: &'static str = include_str!("compiler/Cargo.toml");
+
         let build = root.as_ref().join("target").join("icebergs");
         fs::create_dir_all(&build)?;
 
@@ -136,8 +139,18 @@ pub struct Iceberg {
 }
 
 impl Iceberg {
+    pub const LIBRARY: &'static str = include_str!("compiler/library.html");
+    pub const EMBED: &'static str = include_str!("compiler/embed.html");
+
     pub fn embed(&self) -> String {
-        EMBEDDING.replace("{{ HASH }}", self.hash.as_str())
+        static COUNT: AtomicU64 = AtomicU64::new(0);
+
+        Self::EMBED
+            .replace("{{ HASH }}", self.hash.as_str())
+            .replace(
+                "{{ ID }}",
+                &COUNT.fetch_add(1, atomic::Ordering::Relaxed).to_string(),
+            )
     }
 }
 
@@ -210,6 +223,3 @@ fn copy_dir_all(from: impl AsRef<Path>, to: impl AsRef<Path>) -> Result<(), Erro
 
     Ok(())
 }
-
-const CARGO_TOML: &'static str = include_str!("compiler/Cargo.toml");
-const EMBEDDING: &'static str = include_str!("compiler/embedding.html");
