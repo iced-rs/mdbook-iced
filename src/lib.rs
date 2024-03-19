@@ -84,36 +84,43 @@ fn process_chapter(
         _ => in_iced_code,
     });
 
-    let mut icebergs = BTreeSet::new();
+    let mut icebergs = Vec::new();
 
     let output = groups.into_iter().flat_map(|(is_iced_code, group)| {
         if is_iced_code {
-            let parts: Vec<_> = group.collect();
+            let mut events = Vec::new();
 
-            if let Some(Event::Text(code)) = parts.get(1) {
-                match compiler.compile(code) {
-                    Ok(iceberg) => {
-                        let embedding = iceberg.embed();
-                        icebergs.insert(iceberg);
-
-                        Box::new(
-                            parts
-                                .into_iter()
-                                .chain(std::iter::once(Event::InlineHtml(embedding.into()))),
-                        )
+            for event in group {
+                if let Event::Start(_) = &event {
+                    icebergs.push(None);
+                    events.push(event);
+                } else if let Event::Text(code) = &event {
+                    if let Ok(iceberg) = compiler.compile(code) {
+                        if let Some(last_iceberg) = icebergs.last_mut() {
+                            *last_iceberg = Some(iceberg);
+                        }
                     }
-                    Err(_) => Box::new(parts.into_iter()) as Box<dyn Iterator<Item = Event>>,
+
+                    events.push(event);
+                } else if let Event::End(TagEnd::CodeBlock) = &event {
+                    events.push(event);
+
+                    if let Some(iceberg) = icebergs.last().map(Option::as_ref).flatten() {
+                        events.push(Event::InlineHtml(iceberg.embed().into()));
+                    }
+                } else {
+                    events.push(event);
                 }
-            } else {
-                Box::new(parts.into_iter())
             }
+
+            Box::new(events.into_iter())
         } else {
-            Box::new(group)
+            Box::new(group) as Box<dyn Iterator<Item = Event>>
         }
     });
 
     let mut content = String::with_capacity(chapter.content.len());
     let _ = cmark(output, &mut content)?;
 
-    Ok((content, icebergs))
+    Ok((content, icebergs.into_iter().flatten().collect()))
 }
