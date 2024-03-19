@@ -211,51 +211,5 @@ fn copy_dir_all(from: impl AsRef<Path>, to: impl AsRef<Path>) -> Result<(), Erro
     Ok(())
 }
 
-const CARGO_TOML: &'static str = r#"
-[package]
-name = "iceberg"
-version = "0.0.0"
-edition = "2021"
-publish = false
-
-[dependencies.iced]
-git = "https://github.com/iced-rs/iced.git"
-{{ GIT_REFERENCE }}
-features = ["webgl", "web-colors"]
-"#;
-
-const EMBEDDING: &'static str = r#"
-<script type="module" id="iceberg-script-{{ HASH }}">
-  import init from './.icebergs/{{ HASH }}/iceberg.js';
-
-  let me = document.getElementById('iceberg-script-{{ HASH }}');
-
-  // TODO: Find a more reliable way to find the code block
-  let code = me.previousSibling.previousSibling;
-  let buttons = code.querySelector('.buttons');
-  let play = document.createElement('button');
-
-  async function run() {
-    play.remove();
-
-    let example = document.createElement('div');
-    example.style.height = "300px";
-
-    let iced = document.createElement('div');
-    iced.id = 'iced';
-
-    example.append(iced);
-    code.append(example);
-
-    await init();
-  }
-
-  play.title = 'Run example';
-  play.onclick = run;
-
-  play.classList.add('fa');
-  play.classList.add('fa-play');
-
-  buttons.prepend(play);
-</script>
-"#;
+const CARGO_TOML: &'static str = include_str!("compiler/Cargo.toml");
+const EMBEDDING: &'static str = include_str!("compiler/embedding.html");

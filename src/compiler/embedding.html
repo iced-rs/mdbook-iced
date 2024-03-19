@@ -1,0 +1,33 @@
+<script type="module" id="iceberg-script-{{ HASH }}">
+  import init from './.icebergs/{{ HASH }}/iceberg.js';
+
+  let me = document.getElementById('iceberg-script-{{ HASH }}');
+
+  // TODO: Find a more reliable way to find the code block
+  let code = me.previousSibling.previousSibling;
+  let buttons = code.querySelector('.buttons');
+  let play = document.createElement('button');
+
+  async function run() {
+    play.remove();
+
+    let example = document.createElement('div');
+    example.style.height = "300px";
+
+    let iced = document.createElement('div');
+    iced.id = 'iced';
+
+    example.append(iced);
+    code.append(example);
+
+    await init();
+  }
+
+  play.title = 'Run example';
+  play.onclick = run;
+
+  play.classList.add('fa');
+  play.classList.add('fa-play');
+
+  buttons.prepend(play);
+</script>

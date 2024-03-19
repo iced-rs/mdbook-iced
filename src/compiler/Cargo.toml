@@ -1,0 +1,10 @@
+[package]
+name = "iceberg"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies.iced]
+git = "https://github.com/iced-rs/iced.git"
+{{ GIT_REFERENCE }}
+features = ["webgl", "web-colors"]
