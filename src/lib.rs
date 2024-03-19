@@ -60,10 +60,10 @@ fn process_chapter(
     chapter: &Chapter,
 ) -> Result<(String, BTreeSet<compiler::Iceberg>), Error> {
     use itertools::Itertools;
-    use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
+    use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd};
     use pulldown_cmark_to_cmark::cmark;
 
-    let events = Parser::new(&chapter.content);
+    let events = Parser::new_ext(&chapter.content, Options::all());
 
     let mut in_iced_code = false;
 
