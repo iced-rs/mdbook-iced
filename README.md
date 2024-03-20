@@ -1,7 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/rust-lang/mdBook/bd323fb930eaadff4e8ee3859b064731617fd875/src/theme/favicon.svg" height="80">
-<img src="https://raw.githubusercontent.com/iced-rs/iced/af6bc4643df83c4695f0954aa3fdd258988a77cf/docs/logo.svg" height="100">
+<img src="assets/logo.svg" height="150">
 
 # mdbook-iced
 
@@ -15,7 +14,7 @@
 
 An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 
-<img alt="An interactive example" src="https://github.com/iced-rs/mdbook-iced/blob/c4e52186985cf0467b0ee5b132a2cbe75f922a12/docs/example.gif?raw=true">
+<img alt="An interactive example" src="assets/example.gif">
 
 </div>
 
