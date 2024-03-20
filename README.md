@@ -15,7 +15,7 @@
 
 An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 
-<img alt="An interactive example" src="https://github.com/iced-rs/mdbook-iced/blob/master/docs/example.gif?raw=true">
+<img alt="An interactive example" src="https://github.com/iced-rs/mdbook-iced/blob/c4e52186985cf0467b0ee5b132a2cbe75f922a12/docs/example.gif?raw=true">
 
 </div>
 
