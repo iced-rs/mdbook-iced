@@ -13,7 +13,7 @@
 [![Discourse](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.iced.rs%2Fsite%2Fstatistics.json&query=%24.users_count&suffix=%20users&label=discourse&color=5e7ce2)](https://discourse.iced.rs/)
 [![Discord Server](https://img.shields.io/discord/628993209984614400?label=&labelColor=6A7EC2&logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/3xZJ65GAhd)
 
-An mdBook preprocessor to turn [iced] code blocks into interactive examples!
+An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 
 </div>
 
