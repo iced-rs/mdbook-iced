@@ -57,7 +57,38 @@ branch = "master"
 tag = "0.13.0" # Not yet released!
 ```
 
-Then, simply add an `iced` label to any executable code block you want to make playable.
+Then, simply add an `iced` label to any executable code block you want to make playable. For instance, the
+classical counter:
+
+````markdown
+```rust,ignore,iced
+use iced::widget::{button, column, text, Column};
+
+pub fn main() -> iced::Result {
+    iced::run("A counter", update, view)
+}
+
+#[derive(Debug, Clone)]
+enum Message {
+    Increment,
+}
+
+fn update(value: &mut u64, message: Message) {
+    match message {
+        Message::Increment => *value += 1,
+    }
+}
+
+fn view(value: &u64) -> Column<Message> {
+    column![
+        text(value),
+        button("+").on_press(Message::Increment),
+    ]
+}
+```
+````
+
+You can control the height of the embedded application by using `iced(height=<CSS height>)` as a label (e.g. `iced(height=100px)`).
 
 [iced]: https://github.com/iced-rs/iced
 [`wasm-bindgen-cli`]: https://rustwasm.github.io/wasm-bindgen/reference/cli.html
