@@ -58,6 +58,10 @@ Then, simply add an `iced` label to any executable code block you want to make p
 classical counter:
 
 ````markdown
+# A cool example
+
+This is an mdBook and here is an iced counter:
+
 ```rust,ignore,iced
 use iced::widget::{button, column, text, Column};
 
