@@ -7,7 +7,7 @@ description = "An mdBook preprocessor to turn iced code blocks into interactive 
 repository = "https://github.com/iced-rs/mdbook-iced"
 authors = ["Héctor Ramón Jiménez <hector@hecrj.dev>"]
 readme = "README.md"
-keywords = ["book", "gitbook", "rustbook", "markdown", "mdbook", "gui", "iced", "interactive"]
+keywords = ["book", "mdbook", "gui", "iced", "interactive"]
 
 [dependencies]
 mdbook = "0.4"
