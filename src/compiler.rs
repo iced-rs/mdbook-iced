@@ -16,7 +16,7 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn set_up(root: impl AsRef<Path>, reference: Reference) -> Result<Self, Error> {
-        const CARGO_TOML: &'static str = include_str!("compiler/Cargo.toml");
+        const CARGO_TOML: &'static str = include_str!("compiler/Cargo.toml.template");
 
         let build = root.as_ref().join("target").join("icebergs");
         fs::create_dir_all(&build)?;
