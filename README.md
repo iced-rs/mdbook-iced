@@ -15,16 +15,14 @@
 
 An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 
+<img alt="An interactive example" src="https://github.com/iced-rs/mdbook-iced/blob/master/docs/example.gif?raw=true">
+
 </div>
 
 ## Overview
 This is a simple mdBook preprocessor that can add a play button to any [iced] code blocks.
 
-![The play button](docs/play.png)
-
 Pressing the play button loads and embeds the resulting Wasm application in a fully interactive `<canvas>` right under the code block.
-
-![An interactive example](docs/example.png)
 
 It is compatible with any code block that features a `main` function where an [iced] program is run—even if it is commented! This means
 it can be used to create interactive examples even for books completely unrelated to [iced].
