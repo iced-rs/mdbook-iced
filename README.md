@@ -19,7 +19,7 @@ An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 </div>
 
 ## Overview
-This is a simple mdBook preprocessor that can add a play button to any [iced] code blocks.
+This is a simple mdBook preprocessor that can add a play button to any [iced] code block.
 
 Pressing the play button loads and embeds the resulting Wasm application in a fully interactive `<canvas>` right under the code block.
 
