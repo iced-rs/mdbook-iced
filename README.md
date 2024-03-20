@@ -1,0 +1,64 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/rust-lang/mdBook/bd323fb930eaadff4e8ee3859b064731617fd875/src/theme/favicon.svg" height="80">
+<img src="https://raw.githubusercontent.com/iced-rs/iced/af6bc4643df83c4695f0954aa3fdd258988a77cf/docs/logo.svg" height="100">
+
+# mdbook-iced
+
+[![Documentation](https://docs.rs/mdbook-iced/badge.svg)](https://docs.rs/mdbook-iced)
+[![Crates.io](https://img.shields.io/crates/v/mdbook-iced.svg)](https://crates.io/crates/mdbook-iced)
+[![License](https://img.shields.io/crates/l/mdbook-iced.svg)](https://github.com/iced-rs/mdbook-iced/blob/master/LICENSE)
+[![Downloads](https://img.shields.io/crates/d/mdbook-iced.svg)](https://crates.io/crates/mdbook-iced)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/iced-rs/mdbook-iced/test.yml?branch=master&event=push&label=test)](https://github.com/iced-rs/mdbook-iced/actions)
+[![Discourse](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscourse.iced.rs%2Fsite%2Fstatistics.json&query=%24.users_count&suffix=%20users&label=discourse&color=5e7ce2)](https://discourse.iced.rs/)
+[![Discord Server](https://img.shields.io/discord/628993209984614400?label=&labelColor=6A7EC2&logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/3xZJ65GAhd)
+
+An mdBook preprocessor to turn [iced] code blocks into interactive examples!
+
+</div>
+
+## Overview
+This is a simple mdBook preprocessor that can add a play button to any [iced] code blocks.
+
+![The play button](docs/play.png)
+
+Pressing the play button loads and embeds the resulting Wasm application in a fully interactive `<canvas>` right under the code block.
+
+![An interactive example](docs/example.png)
+
+It is compatible with any code block that features a `main` function where an [iced] program is run—even if it is commented! This means
+it can be used to create interactive examples even for books completely unrelated to [iced].
+
+Currently, this preprocessor is mainly being used in [the official guide] to [iced]. Check it out!
+
+## Installation
+Install the `mdbook-iced` preprocessor and the [`wasm-bindgen-cli`] tool with `cargo install`:
+
+```
+cargo install mdbook-iced wasm-bindgen-cli
+```
+
+Also, make sure your toolchain has the `wasm32-unknown-unknown` target:
+
+```
+rustup target add wasm32-unknown-unknown
+```
+
+## Usage
+Add a `[preprocessor.iced]` entry to your `book.toml` and specify the revision of `iced` your book will use:
+
+```toml
+[preprocessor.iced]
+# You can use a commit hash
+rev = "9db6ac8f202ebdc1453edee01da0b30aee0949d8"
+# ... a branch
+branch = "master"
+# ... or a tag!
+tag = "0.13.0" # Not yet released!
+```
+
+Then, simply add an `iced` label to any executable code block you want to make playable.
+
+[iced]: https://github.com/iced-rs/iced
+[`wasm-bindgen-cli`]: https://rustwasm.github.io/wasm-bindgen/reference/cli.html
+[the official guide]: https://book.iced.rs/
