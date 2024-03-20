@@ -16,7 +16,7 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn set_up(root: impl AsRef<Path>, reference: Reference) -> Result<Self, Error> {
-        const CARGO_TOML: &'static str = include_str!("compiler/Cargo.toml.template");
+        const CARGO_TOML: &str = include_str!("compiler/Cargo.toml.template");
 
         let build = root.as_ref().join("target").join("icebergs");
         fs::create_dir_all(&build)?;
@@ -63,7 +63,7 @@ impl Compiler {
             .join("\n");
 
         let hash = Hash(
-            Sha256::digest(&format!("{code}{}", self.hash))
+            Sha256::digest(format!("{code}{}", self.hash))
                 .into_iter()
                 .map(|byte| format!("{byte:x}"))
                 .join(""),
@@ -106,18 +106,18 @@ impl Compiler {
     }
 
     pub fn retain(&self, icebergs: &BTreeSet<Iceberg>) -> Result<(), Error> {
-        clean_dir(&self.artifacts, &icebergs)?;
+        clean_dir(&self.artifacts, icebergs)?;
 
         Ok(())
     }
 
-    pub fn release<'a>(
+    pub fn release(
         &self,
         icebergs: &BTreeSet<Iceberg>,
         target: impl AsRef<Path>,
     ) -> Result<(), Error> {
         let target = target.as_ref();
-        clean_dir(target, &icebergs)?;
+        clean_dir(target, icebergs)?;
 
         for iceberg in icebergs {
             let output = target.join(iceberg.hash.as_str());

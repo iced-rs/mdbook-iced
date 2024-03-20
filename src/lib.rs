@@ -71,7 +71,7 @@ fn process_chapter(
         Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(label)))
             if label.starts_with("rust")
                 && label
-                    .split(",")
+                    .split(',')
                     .any(|modifier| modifier.starts_with("iced")) =>
         {
             in_iced_code = true;
@@ -104,7 +104,7 @@ fn process_chapter(
                             Some(
                                 modifier
                                     .strip_prefix("iced(")?
-                                    .strip_suffix(")")?
+                                    .strip_suffix(')')?
                                     .split_once("height=")?
                                     .1
                                     .to_string(),
@@ -131,10 +131,10 @@ fn process_chapter(
                         events.push(Event::InlineHtml(compiler::Iceberg::LIBRARY.into()));
                     }
 
-                    if let Some(iceberg) = icebergs.last().map(Option::as_ref).flatten() {
+                    if let Some(iceberg) = icebergs.last().and_then(Option::as_ref) {
                         events.push(Event::InlineHtml(
                             iceberg
-                                .embed(heights.last().map(Option::as_deref).flatten())
+                                .embed(heights.last().and_then(Option::as_deref))
                                 .into(),
                         ));
                     }
