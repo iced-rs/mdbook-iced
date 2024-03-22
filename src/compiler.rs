@@ -25,7 +25,7 @@ impl Compiler {
         fs::create_dir_all(&src)?;
 
         let artifacts = build.join("target").join("mdbook");
-        fs::create_dir_all(&src)?;
+        fs::create_dir_all(&artifacts)?;
 
         let cargo_config = CARGO_TOML.replace(
             "{{ GIT_REFERENCE }}",
