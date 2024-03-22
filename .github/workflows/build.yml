@@ -22,4 +22,4 @@ jobs:
     - name: Build book
       run: cd book && mdbook build
     - name: Check iceberg artifacts exist
-      run: ls book/.icebergs/*
+      run: cd book && ls book/.icebergs/*
