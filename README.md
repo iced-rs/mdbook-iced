@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="book/assets/logo.svg" height="150">
+<img src="book/src/assets/logo.svg" height="150">
 
 # mdbook-iced
 
@@ -14,7 +14,7 @@
 
 An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 
-<img alt="An interactive example" src="book/assets/example.gif">
+<img alt="An interactive example" src="book/src/assets/example.gif">
 
 </div>
 
