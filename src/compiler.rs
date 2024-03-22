@@ -37,6 +37,23 @@ impl Compiler {
         );
         fs::write(build.join("Cargo.toml"), cargo_config.trim_start())?;
 
+        let gitignore = root.as_ref().join(".gitignore");
+        if let Ok(mut ignored) = fs::read_to_string(&gitignore) {
+            if !ignored.ends_with("\n") {
+                ignored.push_str("\n");
+            }
+
+            if !ignored.lines().any(|line| line == "target") {
+                ignored.push_str("target\n");
+            }
+
+            if !ignored.lines().any(|line| line == ".icebergs") {
+                ignored.push_str(".icebergs\n");
+            }
+
+            fs::write(gitignore, ignored)?;
+        }
+
         let hash = {
             use std::hash::{DefaultHasher, Hash, Hasher};
 
