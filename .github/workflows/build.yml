@@ -1,0 +1,24 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  book:
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTFLAGS: --deny warnings
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+    - uses: hecrj/setup-rust-action@v2
+      with:
+        rust-version: stable
+    - name: Add `wasm32-unknown-unknown` target
+      run: rustup target add wasm32-unknown-unknown
+    - name: Install `mdbook` and `wasm-bindgen-cli`
+      run: cargo install mdbook wasm-bindgen-cli
+    - name: Install `mdbook-iced`
+      run: cargo install --path .
+    - name: Build book
+      run: cd book && mdbook build
+    - name: Check iceberg artifacts exist
+      run: ls book/.icebergs/*
