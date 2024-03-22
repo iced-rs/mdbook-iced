@@ -7,4 +7,5 @@ publish = false
 [dependencies.iced]
 git = "https://github.com/iced-rs/iced.git"
 {{ GIT_REFERENCE }}
-features = ["webgl", "web-colors"]
+default-features = false
+features = ["wgpu", "webgl", "web-colors", "fira-sans"]
