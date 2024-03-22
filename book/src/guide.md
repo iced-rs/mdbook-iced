@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="book/assets/logo.svg" height="150">
+<img src="assets/logo.svg" height="150">
 
 # mdbook-iced
 
@@ -14,7 +14,7 @@
 
 An mdBook preprocessor to turn [iced] code blocks into interactive examples.
 
-<img alt="An interactive example" src="book/assets/example.gif">
+<img alt="An interactive example" src="assets/example.gif">
 
 </div>
 
@@ -63,36 +63,90 @@ classical counter:
 This is an mdBook and here is an iced counter:
 
 ```rust,ignore,iced
-use iced::widget::{button, column, text, Column};
-
+# use iced::widget::{button, column, text, Column};
+#
 pub fn main() -> iced::Result {
     iced::run("A counter", update, view)
 }
-
-#[derive(Debug, Clone)]
-enum Message {
-    Increment,
-}
-
-fn update(value: &mut u64, message: Message) {
-    match message {
-        Message::Increment => *value += 1,
-    }
-}
-
-fn view(value: &u64) -> Column<Message> {
-    column![
-        text(value),
-        button("+").on_press(Message::Increment),
-    ]
-}
+# 
+# #[derive(Debug, Clone)]
+# enum Message {
+#     Increment,
+# }
+# 
+# fn update(value: &mut u64, message: Message) {
+#     match message {
+#         Message::Increment => *value += 1,
+#     }
+# }
+# 
+# fn view(value: &u64) -> Column<Message> {
+#     column![
+#         text(value),
+#         button("+").on_press(Message::Increment),
+#     ]
+# }
 ```
 ````
 
-You can control the height of the embedded application by using `iced(height=<CSS height>)` as a label (e.g. `iced(height=100px)`).
+This produces the following code block:
 
-Check out the [`book`](book) directory for a real mdBook example!
+```rust,ignore,iced
+# use iced::widget::{button, column, text, Column};
+#
+pub fn main() -> iced::Result {
+    iced::run("A counter", update, view)
+}
+# 
+# #[derive(Debug, Clone)]
+# enum Message {
+#     Increment,
+# }
+# 
+# fn update(value: &mut u64, message: Message) {
+#     match message {
+#         Message::Increment => *value += 1,
+#     }
+# }
+# 
+# fn view(value: &u64) -> Column<Message> {
+#     column![
+#         text(value),
+#         button("+").on_press(Message::Increment),
+#     ]
+# }
+```
+
+You can control the height of the embedded application by using `iced(height=<CSS height>)` as a label (e.g. `iced(height=100px)`).
+For instance:
+
+```rust,ignore,iced(height=100px)
+# use iced::widget::{button, column, text, Column};
+#
+pub fn main() -> iced::Result {
+    iced::run("A counter", update, view)
+}
+# 
+# #[derive(Debug, Clone)]
+# enum Message {
+#     Decrement,
+# }
+# 
+# fn update(value: &mut u64, message: Message) {
+#     match message {
+#         Message::Decrement => *value -= 1,
+#     }
+# }
+# 
+# fn view(value: &u64) -> Column<Message> {
+#     column![
+#         text(value),
+#         button("-").on_press(Message::Decrement),
+#     ]
+# }
+```
 
 [iced]: https://github.com/iced-rs/iced
 [`wasm-bindgen-cli`]: https://rustwasm.github.io/wasm-bindgen/reference/cli.html
 [the official guide]: https://book.iced.rs/
+
