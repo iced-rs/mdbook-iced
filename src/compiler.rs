@@ -39,8 +39,8 @@ impl Compiler {
 
         let gitignore = root.as_ref().join(".gitignore");
         if let Ok(mut ignored) = fs::read_to_string(&gitignore) {
-            if !ignored.ends_with("\n") {
-                ignored.push_str("\n");
+            if !ignored.ends_with('\n') {
+                ignored.push('\n');
             }
 
             if !ignored.lines().any(|line| line == "target") {
