@@ -59,6 +59,7 @@ impl Compiler {
 
         let code = code
             .lines()
+            .filter(|&line| line != "#")
             .map(|line| line.strip_prefix("# ").unwrap_or(line))
             .join("\n");
 
