@@ -34,7 +34,7 @@ fn main() -> Result<(), Error> {
         process::exit(0);
     }
 
-    if let Some(_) = matches.subcommand_matches("clean") {
+    if matches.subcommand_matches("clean").is_some() {
         clean(PathBuf::new())?;
 
         process::exit(0);
