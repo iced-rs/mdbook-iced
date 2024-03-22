@@ -1,10 +1,11 @@
-use mdbook_iced::{is_supported, run};
+use mdbook_iced::{clean, is_supported, run};
 
 use clap::{Arg, Command};
 use mdbook::errors::Error;
 use mdbook::preprocess::CmdPreprocessor;
 
 use std::io;
+use std::path::PathBuf;
 use std::process;
 
 fn main() -> Result<(), Error> {
@@ -13,8 +14,11 @@ fn main() -> Result<(), Error> {
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
-                .about("Check whether a renderer is supported by this preprocessor"),
-        );
+                .about("Check whether a renderer is supported by this preprocessor."),
+        )
+        .subcommand(Command::new("clean").about(
+            "Cleans the artifacts and binaries produced by this preprocessor in the current book.",
+        ));
 
     let matches = command.get_matches();
 
@@ -26,6 +30,12 @@ fn main() -> Result<(), Error> {
         if !is_supported(renderer) {
             process::exit(1);
         }
+
+        process::exit(0);
+    }
+
+    if let Some(_) = matches.subcommand_matches("clean") {
+        clean(PathBuf::new())?;
 
         process::exit(0);
     }

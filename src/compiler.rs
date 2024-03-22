@@ -149,6 +149,13 @@ impl Compiler {
 
         Ok(())
     }
+
+    pub fn clean(root: impl AsRef<Path>) -> Result<(), Error> {
+        let build = root.as_ref().join("target").join("icebergs");
+        fs::remove_dir_all(build)?;
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

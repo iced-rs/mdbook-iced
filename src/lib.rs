@@ -2,13 +2,14 @@ mod compiler;
 
 use compiler::Compiler;
 
+use anyhow::Error;
 use mdbook::book::{Book, BookItem, Chapter};
-use mdbook::errors::Error;
 use mdbook::preprocess::PreprocessorContext;
 use semver::{Version, VersionReq};
 
 use std::collections::BTreeSet;
 use std::fs;
+use std::path::Path;
 
 pub fn is_supported(renderer: &str) -> bool {
     renderer == "html"
@@ -160,4 +161,21 @@ fn process_chapter(
     let _ = cmark(output, &mut content)?;
 
     Ok((content, icebergs.into_iter().flatten().collect()))
+}
+
+pub fn clean(root: impl AsRef<Path>) -> Result<(), Error> {
+    let book_toml = root.as_ref().join("book.toml");
+    if !book_toml.exists() {
+        return Err(Error::msg(
+            "book.toml not found in the current directory. This command \
+            can only be run in an mdBook project.",
+        ));
+    }
+
+    let output = root.as_ref().join("src").join(".icebergs");
+    fs::remove_dir_all(output)?;
+
+    Compiler::clean(root)?;
+
+    Ok(())
 }
