@@ -132,13 +132,13 @@ pub fn main() -> iced::Result {
 #     Decrement,
 # }
 # 
-# fn update(value: &mut u64, message: Message) {
+# fn update(value: &mut i64, message: Message) {
 #     match message {
 #         Message::Decrement => *value -= 1,
 #     }
 # }
 # 
-# fn view(value: &u64) -> Column<Message> {
+# fn view(value: &i64) -> Column<Message> {
 #     column![
 #         text(value),
 #         button("-").on_press(Message::Decrement),

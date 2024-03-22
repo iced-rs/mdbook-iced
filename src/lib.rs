@@ -94,6 +94,7 @@ fn process_chapter(
     let output = groups.into_iter().flat_map(|(is_iced_code, group)| {
         if is_iced_code {
             let mut events = Vec::new();
+            let mut code = String::new();
 
             for event in group {
                 if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(label))) = &event {
@@ -111,19 +112,25 @@ fn process_chapter(
                             )
                         });
 
+                    code.clear();
                     icebergs.push(None);
                     heights.push(height);
                     events.push(event);
-                } else if let Event::Text(code) = &event {
-                    if let Ok(iceberg) = compiler.compile(code) {
+                } else if let Event::Text(text) = &event {
+                    if !code.ends_with('\n') {
+                        code.push('\n');
+                    }
+
+                    code.push_str(text);
+                    events.push(event);
+                } else if let Event::End(TagEnd::CodeBlock) = &event {
+                    events.push(event);
+
+                    if let Ok(iceberg) = compiler.compile(&code) {
                         if let Some(last_iceberg) = icebergs.last_mut() {
                             *last_iceberg = Some(iceberg);
                         }
                     }
-
-                    events.push(event);
-                } else if let Event::End(TagEnd::CodeBlock) = &event {
-                    events.push(event);
 
                     if is_first {
                         is_first = false;
