@@ -8,6 +8,7 @@ repository = "https://github.com/iced-rs/mdbook-iced"
 authors = ["Héctor Ramón Jiménez <hector@hecrj.dev>"]
 readme = "README.md"
 keywords = ["book", "mdbook", "gui", "iced", "interactive"]
+exclude = ["*.gif"]
 
 [dependencies]
 mdbook = "0.4"
