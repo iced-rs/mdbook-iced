@@ -24,7 +24,7 @@ function embed(script, hash, height) {
     example.append(iced);
     code.append(example);
 
-    let iceberg = await import(`./.icebergs/${hash}/iceberg.js`);
+    let iceberg = await import(`/.icebergs/${hash}/iceberg.js`);
     await iceberg.default();
   }
 
