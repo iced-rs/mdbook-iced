@@ -8,4 +8,4 @@ publish = false
 git = "https://github.com/iced-rs/iced.git"
 {{ GIT_REFERENCE }}
 default-features = false
-features = ["wgpu", "webgl", "web-colors", "fira-sans"]
+features = ["wgpu", "webgl", "web-colors", "fira-sans", "auto-detect-theme"]
