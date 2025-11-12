@@ -8,7 +8,7 @@ iced_.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 iced_.workspace = true
-iced_.features = ["tokio"]
+iced_.features = ["tokio", "tiny-skia"]
 
 iced_test.workspace = true
 png = "0.18"
