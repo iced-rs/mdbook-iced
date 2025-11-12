@@ -80,7 +80,7 @@ pub fn main() -> iced::Result {
 #     }
 # }
 # 
-# fn view(value: &u64) -> Column<Message> {
+# fn view(value: &u64) -> Column<'_, Message> {
 #     column![
 #         text(value),
 #         button("+").on_press(Message::Increment),
@@ -109,7 +109,7 @@ pub fn main() -> iced::Result {
 #     }
 # }
 # 
-# fn view(value: &u64) -> Column<Message> {
+# fn view(value: &u64) -> Column<'_, Message> {
 #     column![
 #         text(value),
 #         button("+").on_press(Message::Increment),
@@ -138,7 +138,7 @@ pub fn main() -> iced::Result {
 #     }
 # }
 # 
-# fn view(value: &i64) -> Column<Message> {
+# fn view(value: &i64) -> Column<'_, Message> {
 #     column![
 #         text(value),
 #         button("-").on_press(Message::Decrement),
