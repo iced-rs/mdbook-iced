@@ -4,8 +4,22 @@ version = "0.0.0"
 edition = "2021"
 publish = false
 
-[dependencies.iced]
+[dependencies]
+iced.workspace = true
+
+[workspace]
+members = ["iced"]
+
+[workspace.dependencies.iced]
+path = "./iced"
+
+[workspace.dependencies.iced_]
+package = "iced"
 git = "https://github.com/iced-rs/iced.git"
 {{ GIT_REFERENCE }}
 default-features = false
-features = ["wgpu", "webgl", "web-colors", "fira-sans", "auto-detect-theme"]
+features = ["wgpu", "webgl", "web-colors", "fira-sans", "thread-pool"]
+
+[workspace.dependencies.iced_test]
+git = "https://github.com/iced-rs/iced.git"
+{{ GIT_REFERENCE }}

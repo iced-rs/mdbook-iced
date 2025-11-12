@@ -103,15 +103,16 @@ fn process_chapter(
                         .split(',')
                         .find(|modifier| modifier.starts_with("iced"))
                         .and_then(|modifier| {
-                            Some(
-                                modifier
-                                    .strip_prefix("iced(")?
-                                    .strip_suffix(')')?
-                                    .split_once("height=")?
-                                    .1
-                                    .to_string(),
-                            )
-                        });
+                            modifier
+                                .strip_prefix("iced(")?
+                                .strip_suffix(')')?
+                                .split_once("height=")?
+                                .1
+                                .to_string()
+                                .parse()
+                                .ok()
+                        })
+                        .unwrap_or(200);
 
                     code.clear();
                     icebergs.push(None);
@@ -127,7 +128,9 @@ fn process_chapter(
                 } else if let Event::End(TagEnd::CodeBlock) = &event {
                     events.push(event);
 
-                    if let Ok(iceberg) = compiler.compile(&code) {
+                    if let Ok(iceberg) =
+                        compiler.compile(&code, heights.last().copied().unwrap_or(200))
+                    {
                         if let Some(last_iceberg) = icebergs.last_mut() {
                             *last_iceberg = Some(iceberg);
                         }
@@ -140,11 +143,7 @@ fn process_chapter(
                     }
 
                     if let Some(iceberg) = icebergs.last().and_then(Option::as_ref) {
-                        events.push(Event::InlineHtml(
-                            iceberg
-                                .embed(heights.last().and_then(Option::as_deref))
-                                .into(),
-                        ));
+                        events.push(Event::InlineHtml(iceberg.embed().into()));
                     }
                 } else {
                     events.push(event);

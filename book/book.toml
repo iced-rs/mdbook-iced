@@ -6,4 +6,4 @@ src = "src"
 title = "mdbook-iced"
 
 [preprocessor.iced]
-rev = "441e9237cd1c9c9b61d9b144b5b4dafa236ace28"
+rev = "54b5c52db2d6f64802af37a3aea9653ebf1e6b0b"

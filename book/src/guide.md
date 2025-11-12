@@ -66,7 +66,7 @@ This is an mdBook and here is an iced counter:
 # use iced::widget::{button, column, text, Column};
 #
 pub fn main() -> iced::Result {
-    iced::run("A counter", update, view)
+    iced::run(update, view)
 }
 # 
 # #[derive(Debug, Clone)]
@@ -95,7 +95,7 @@ This produces the following code block:
 # use iced::widget::{button, column, text, Column};
 #
 pub fn main() -> iced::Result {
-    iced::run("A counter", update, view)
+    iced::run(update, view)
 }
 # 
 # #[derive(Debug, Clone)]
@@ -117,14 +117,14 @@ pub fn main() -> iced::Result {
 # }
 ```
 
-You can control the height of the embedded application by using `iced(height=<CSS height>)` as a label (e.g. `iced(height=100px)`).
+You can control the height of the embedded application by using `iced(height=<pixels>)` as a label (e.g. `iced(height=100)`).
 For instance:
 
-```rust,ignore,iced(height=100px)
+```rust,ignore,iced(height=100)
 # use iced::widget::{button, column, text, Column};
 #
 pub fn main() -> iced::Result {
-    iced::run("A counter", update, view)
+    iced::run(update, view)
 }
 # 
 # #[derive(Debug, Clone)]
@@ -149,4 +149,3 @@ pub fn main() -> iced::Result {
 [iced]: https://github.com/iced-rs/iced
 [`wasm-bindgen-cli`]: https://rustwasm.github.io/wasm-bindgen/reference/cli.html
 [the official guide]: https://book.iced.rs/
-

@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{bail, Error};
 
 use std::collections::BTreeSet;
 use std::fs;
@@ -17,9 +17,25 @@ pub struct Compiler {
 impl Compiler {
     pub fn set_up(root: impl AsRef<Path>, reference: Reference) -> Result<Self, Error> {
         const CARGO_TOML: &str = include_str!("compiler/Cargo.toml.template");
+        const ICED_LIB: &str = include_str!("./compiler/iced/src/lib.rs");
+        const ICED_CARGO_TOML: &str = include_str!("./compiler/iced/Cargo.toml");
 
         let build = root.as_ref().join("target").join("icebergs");
         fs::create_dir_all(&build)?;
+
+        let iced = build.join("iced");
+        fs::create_dir_all(&iced)?;
+
+        let iced_src = iced.join("src");
+        fs::create_dir_all(&iced_src)?;
+
+        // if !fs::exists(iced_src.join("lib.rs"))? {
+        fs::write(iced_src.join("lib.rs"), ICED_LIB)?;
+        // }
+
+        // if !fs::exists(iced.join("Cargo.toml"))? {
+        fs::write(iced.join("Cargo.toml"), ICED_CARGO_TOML)?;
+        // }
 
         let src = build.join("src");
         fs::create_dir_all(&src)?;
@@ -59,6 +75,8 @@ impl Compiler {
 
             let mut hasher = DefaultHasher::new();
             cargo_config.hash(&mut hasher);
+            ICED_CARGO_TOML.hash(&mut hasher);
+            ICED_LIB.hash(&mut hasher);
             hasher.finish()
         };
 
@@ -70,7 +88,7 @@ impl Compiler {
         })
     }
 
-    pub fn compile(&self, code: &str) -> Result<Iceberg, Error> {
+    pub fn compile(&self, code: &str, height: u32) -> Result<Iceberg, Error> {
         use itertools::Itertools;
         use sha2::{Digest, Sha256};
 
@@ -81,7 +99,7 @@ impl Compiler {
             .join("\n");
 
         let hash = Hash(
-            Sha256::digest(format!("{code}{}", self.hash))
+            Sha256::digest(format!("{code}{height}{}", self.hash))
                 .into_iter()
                 .map(|byte| format!("{byte:x}"))
                 .join(""),
@@ -90,12 +108,12 @@ impl Compiler {
         let artifact_dir = self.artifacts.join(hash.as_str());
 
         if artifact_dir.exists() {
-            return Ok(Iceberg { hash });
+            return Ok(Iceberg { hash, height });
         }
 
         fs::write(self.src.join("main.rs"), code)?;
 
-        let compilation = process::Command::new("cargo")
+        let mut compilation = process::Command::new("cargo")
             .args(["build", "--release", "--target", "wasm32-unknown-unknown"])
             .env("RUSTFLAGS", "")
             .current_dir(&self.build)
@@ -103,11 +121,17 @@ impl Compiler {
             .spawn()?;
 
         std::io::copy(
-            &mut std::io::BufReader::new(compilation.stdout.expect("Open compilation output")),
+            &mut std::io::BufReader::new(
+                compilation.stdout.take().expect("Open compilation output"),
+            ),
             &mut std::io::stderr(),
         )?;
 
-        process::Command::new("wasm-bindgen")
+        if !compilation.wait()?.success() {
+            bail!("compilation failed");
+        }
+
+        let mut wasm_bindgen = process::Command::new("wasm-bindgen")
             .args([
                 "--target",
                 "web",
@@ -117,10 +141,33 @@ impl Compiler {
                 "target/wasm32-unknown-unknown/release/iceberg.wasm",
             ])
             .current_dir(&self.build)
-            .spawn()?
-            .wait()?;
+            .spawn()?;
 
-        Ok(Iceberg { hash })
+        if !wasm_bindgen.wait()?.success() {
+            bail!("wasm-bindgen failed");
+        }
+
+        let mut screenshot = process::Command::new("cargo")
+            .args(["run", "--release", "--", &height.to_string()])
+            .current_dir(&self.build)
+            .stdout(process::Stdio::piped())
+            .spawn()?;
+
+        std::io::copy(
+            &mut std::io::BufReader::new(
+                screenshot.stdout.take().expect("Open compilation output"),
+            ),
+            &mut std::io::stderr(),
+        )?;
+
+        if !screenshot.wait()?.success() {
+            bail!("screenshot failed");
+        }
+
+        std::fs::copy(self.build.join("light.png"), artifact_dir.join("light.png"))?;
+        std::fs::copy(self.build.join("dark.png"), artifact_dir.join("dark.png"))?;
+
+        Ok(Iceberg { hash, height })
     }
 
     pub fn retain(&self, icebergs: &BTreeSet<Iceberg>) -> Result<(), Error> {
@@ -161,13 +208,14 @@ impl Compiler {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Iceberg {
     hash: Hash,
+    height: u32,
 }
 
 impl Iceberg {
     pub const LIBRARY: &'static str = include_str!("compiler/library.html");
     pub const EMBED: &'static str = include_str!("compiler/embed.html");
 
-    pub fn embed(&self, height: Option<&str>) -> String {
+    pub fn embed(&self) -> String {
         static COUNT: AtomicU64 = AtomicU64::new(0);
 
         Self::EMBED
@@ -176,7 +224,7 @@ impl Iceberg {
                 "{{ ID }}",
                 &COUNT.fetch_add(1, atomic::Ordering::Relaxed).to_string(),
             )
-            .replace("{{ HEIGHT }}", height.unwrap_or("200px"))
+            .replace("{{ HEIGHT }}", &format!("{}px", self.height))
     }
 }
 

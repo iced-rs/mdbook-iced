@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-iced"
-version = "0.2.0"
+version = "0.14.0-dev"
 edition = "2021"
 license = "MIT"
 description = "An mdBook preprocessor to turn iced code blocks into interactive examples"
@@ -21,6 +21,18 @@ itertools = "0.12"
 sha2 = "0.10"
 clap = "4.5"
 anyhow = "1.0"
+
+[workspace]
+members = ["./src/compiler/iced"]
+
+[workspace.dependencies.iced_]
+package = "iced"
+version = "0.14.0-dev"
+git = "https://github.com/iced-rs/iced.git" 
+
+[workspace.dependencies.iced_test]
+version = "0.14.0-dev"
+git = "https://github.com/iced-rs/iced.git"
 
 [[bin]]
 name = "mdbook-iced"

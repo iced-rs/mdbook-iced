@@ -1,0 +1,14 @@
+[package]
+name = "iced"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+iced_.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+iced_.workspace = true
+iced_.features = ["tokio"]
+
+iced_test.workspace = true
+png = "0.18"

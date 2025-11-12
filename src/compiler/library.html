@@ -6,34 +6,69 @@ function embed(script, hash, height) {
     code = code.previousSibling;
   }
 
-  let buttons = code.querySelector('.buttons');
+
+  let example = document.createElement('div');
+  example.style.position = "relative";
+  example.style.height = height;
+  example.style.padding = "1rem";
+  example.style.overflow = "hidden";
+  example.classList.add('hljs');
+
+  let picture = document.createElement('picture');
+
+  let dark = document.createElement('source');
+  dark.srcset = `/.icebergs/${hash}/dark.png`;
+  dark.media = "(prefers-color-scheme: dark)";
+
+  let light = document.createElement('img');
+  light.src = `/.icebergs/${hash}/light.png`;
+  light.style.objectFit = "cover";
+  light.style.objectPosition = "left";
+  light.style.height = `${height}`;
+
+  picture.append(dark);
+  picture.append(light);
+  example.append(picture);
+
   let play = document.createElement('button');
 
   async function run() {
-    play.remove();
-
-    let example = document.createElement('div');
-    example.style.height = height;
-    example.style.padding = "1rem";
-    example.classList.add('hljs');
+    picture.remove();
+    play.onclick = function(){};
+    play.innerHTML = "Loading...";
 
     let iced = document.createElement('div');
     iced.id = 'iced';
-    iced.append(document.createTextNode('Loading...'));
-
     example.append(iced);
-    code.append(example);
 
     let iceberg = await import(`/.icebergs/${hash}/iceberg.js`);
     await iceberg.default();
+
+    play.remove();
   }
 
   play.title = 'Run example';
   play.onclick = run;
+  play.style.position = "absolute";
+  play.style.top = "1rem";
+  play.style.left = "1rem";
+  play.style.right = "1rem";
+  play.style.bottom = "1rem";
+  play.style.cursor = "pointer";
+  play.style.background = "rgba(0, 0, 0, 0.5)";
+  play.style.color = "white";
+  play.style.fontFamily = "monospace";
+  play.style.border = "none";
+  play.style.padding = "1rem";
 
-  play.classList.add('fa');
-  play.classList.add('fa-play');
+  let icon = document.createElement('span');
+  icon.classList.add('fa');
+  icon.classList.add('fa-play');
+  icon.style.marginRight = "1rem";
+  play.append(icon);
+  play.append("Click to play");
 
-  buttons.prepend(play);
+  example.append(play);
+  code.append(example);
 }
 </script>
