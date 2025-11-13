@@ -29,13 +29,13 @@ impl Compiler {
         let iced_src = iced.join("src");
         fs::create_dir_all(&iced_src)?;
 
-        // if !fs::exists(iced_src.join("lib.rs"))? {
-        fs::write(iced_src.join("lib.rs"), ICED_LIB)?;
-        // }
+        if !fs::exists(iced_src.join("lib.rs"))? {
+            fs::write(iced_src.join("lib.rs"), ICED_LIB)?;
+        }
 
-        // if !fs::exists(iced.join("Cargo.toml"))? {
-        fs::write(iced.join("Cargo.toml"), ICED_CARGO_TOML)?;
-        // }
+        if !fs::exists(iced.join("Cargo.toml"))? {
+            fs::write(iced.join("Cargo.toml"), ICED_CARGO_TOML)?;
+        }
 
         let src = build.join("src");
         fs::create_dir_all(&src)?;
@@ -88,7 +88,7 @@ impl Compiler {
         })
     }
 
-    pub fn compile(&self, code: &str, height: u32) -> Result<Iceberg, Error> {
+    pub fn compile(&self, code: &str, modifiers: Modifiers) -> Result<Iceberg, Error> {
         use itertools::Itertools;
         use sha2::{Digest, Sha256};
 
@@ -99,19 +99,47 @@ impl Compiler {
             .join("\n");
 
         let hash = Hash(
-            Sha256::digest(format!("{code}{height}{}", self.hash))
-                .into_iter()
-                .map(|byte| format!("{byte:x}"))
-                .join(""),
+            Sha256::digest(format!(
+                "{code}{}{}{}",
+                modifiers.height, modifiers.is_static, self.hash
+            ))
+            .into_iter()
+            .map(|byte| format!("{byte:x}"))
+            .join(""),
         );
 
         let artifact_dir = self.artifacts.join(hash.as_str());
 
         if artifact_dir.exists() {
-            return Ok(Iceberg { hash, height });
+            return Ok(Iceberg { hash, modifiers });
         }
 
         fs::write(self.src.join("main.rs"), code)?;
+
+        let mut screenshot = process::Command::new("cargo")
+            .args(["run", "--release", "--", &modifiers.height.to_string()])
+            .current_dir(&self.build)
+            .stdout(process::Stdio::piped())
+            .spawn()?;
+
+        std::io::copy(
+            &mut std::io::BufReader::new(
+                screenshot.stdout.take().expect("Open compilation output"),
+            ),
+            &mut std::io::stderr(),
+        )?;
+
+        if !screenshot.wait()?.success() {
+            bail!("screenshot failed");
+        }
+
+        std::fs::create_dir_all(&artifact_dir)?;
+        std::fs::copy(self.build.join("light.png"), artifact_dir.join("light.png"))?;
+        std::fs::copy(self.build.join("dark.png"), artifact_dir.join("dark.png"))?;
+
+        if modifiers.is_static {
+            return Ok(Iceberg { hash, modifiers });
+        }
 
         let mut compilation = process::Command::new("cargo")
             .args(["build", "--release", "--target", "wasm32-unknown-unknown"])
@@ -147,27 +175,7 @@ impl Compiler {
             bail!("wasm-bindgen failed");
         }
 
-        let mut screenshot = process::Command::new("cargo")
-            .args(["run", "--release", "--", &height.to_string()])
-            .current_dir(&self.build)
-            .stdout(process::Stdio::piped())
-            .spawn()?;
-
-        std::io::copy(
-            &mut std::io::BufReader::new(
-                screenshot.stdout.take().expect("Open compilation output"),
-            ),
-            &mut std::io::stderr(),
-        )?;
-
-        if !screenshot.wait()?.success() {
-            bail!("screenshot failed");
-        }
-
-        std::fs::copy(self.build.join("light.png"), artifact_dir.join("light.png"))?;
-        std::fs::copy(self.build.join("dark.png"), artifact_dir.join("dark.png"))?;
-
-        Ok(Iceberg { hash, height })
+        Ok(Iceberg { hash, modifiers })
     }
 
     pub fn retain(&self, icebergs: &BTreeSet<Iceberg>) -> Result<(), Error> {
@@ -205,10 +213,25 @@ impl Compiler {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Modifiers {
+    pub height: u32,
+    pub is_static: bool,
+}
+
+impl Default for Modifiers {
+    fn default() -> Self {
+        Self {
+            height: 200,
+            is_static: false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Iceberg {
     hash: Hash,
-    height: u32,
+    modifiers: Modifiers,
 }
 
 impl Iceberg {
@@ -224,7 +247,15 @@ impl Iceberg {
                 "{{ ID }}",
                 &COUNT.fetch_add(1, atomic::Ordering::Relaxed).to_string(),
             )
-            .replace("{{ HEIGHT }}", &format!("{}px", self.height))
+            .replace("{{ HEIGHT }}", &format!("{}px", self.modifiers.height))
+            .replace(
+                "{{ IS_STATIC }}",
+                if self.modifiers.is_static {
+                    "true"
+                } else {
+                    "false"
+                },
+            )
     }
 }
 

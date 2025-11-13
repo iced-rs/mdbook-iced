@@ -89,7 +89,7 @@ fn process_chapter(
     });
 
     let mut icebergs = Vec::new();
-    let mut heights = Vec::new();
+    let mut modifiers_list = Vec::new();
     let mut is_first = true;
 
     let output = groups.into_iter().flat_map(|(is_iced_code, group)| {
@@ -99,24 +99,21 @@ fn process_chapter(
 
             for event in group {
                 if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(label))) = &event {
-                    let height = label
-                        .split(',')
-                        .find(|modifier| modifier.starts_with("iced"))
-                        .and_then(|modifier| {
-                            modifier
-                                .strip_prefix("iced(")?
-                                .strip_suffix(')')?
-                                .split_once("height=")?
-                                .1
-                                .to_string()
-                                .parse()
-                                .ok()
-                        })
+                    let modifiers = label.split(',').map(str::trim);
+
+                    let height = modifiers
+                        .clone()
+                        .find(|modifier| modifier.starts_with("height="))
+                        .unwrap_or_default()
+                        .trim_start_matches("height=")
+                        .parse()
                         .unwrap_or(200);
+
+                    let is_static = modifiers.clone().any(|modifier| modifier == "static");
 
                     code.clear();
                     icebergs.push(None);
-                    heights.push(height);
+                    modifiers_list.push(compiler::Modifiers { height, is_static });
                     events.push(event);
                 } else if let Event::Text(text) = &event {
                     if !code.ends_with('\n') {
@@ -129,7 +126,7 @@ fn process_chapter(
                     events.push(event);
 
                     if let Ok(iceberg) =
-                        compiler.compile(&code, heights.last().copied().unwrap_or(200))
+                        compiler.compile(&code, modifiers_list.last().copied().unwrap_or_default())
                     {
                         if let Some(last_iceberg) = icebergs.last_mut() {
                             *last_iceberg = Some(iceberg);

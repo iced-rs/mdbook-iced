@@ -117,10 +117,10 @@ pub fn main() -> iced::Result {
 # }
 ```
 
-You can control the height of the embedded application by using `iced(height=<pixels>)` as a label (e.g. `iced(height=100)`).
+You can control the height of the embedded application by using `height=<pixels>` as a modifiers (e.g. `iced,height=100`).
 For instance:
 
-```rust,ignore,iced(height=100)
+```rust,ignore,iced,height=100
 # use iced::widget::{button, column, text, Column};
 #
 pub fn main() -> iced::Result {
@@ -143,6 +143,24 @@ pub fn main() -> iced::Result {
 #         text(value),
 #         button("-").on_press(Message::Decrement),
 #     ]
+# }
+```
+
+Additionally, specify the `static` modifier to only display a static screenshot of the snippet:
+
+```rust,ignore,iced,height=50,static
+use iced::widget::{center, text};
+
+# use iced::widget::Container;
+#
+# pub fn main() -> iced::Result {
+#     iced::run(update, view)
+# }
+#
+# fn update(_state: &mut (), _message: ()) {}
+#
+# fn view(_: &()) -> Container<'_, ()> {
+center(text("I am a static example!"))
 # }
 ```
 

@@ -1,11 +1,10 @@
 <script>
-function embed(script, hash, height) {
+function embed(script, hash, height, is_static) {
   var code = script.previousSibling;
 
   while(code && code.tagName != "PRE") {
     code = code.previousSibling;
   }
-
 
   let example = document.createElement('div');
   example.style.position = "relative";
@@ -22,13 +21,19 @@ function embed(script, hash, height) {
 
   let light = document.createElement('img');
   light.src = `/.icebergs/${hash}/light.png`;
-  light.style.objectFit = "cover";
-  light.style.objectPosition = "left";
-  light.style.height = `${height}`;
 
   picture.append(dark);
   picture.append(light);
   example.append(picture);
+  code.append(example);
+
+  if(is_static) {
+    return;
+  }
+
+  light.style.height = `${height}`;
+  light.style.objectFit = "cover";
+  light.style.objectPosition = "left";
 
   let play = document.createElement('button');
 
@@ -69,6 +74,5 @@ function embed(script, hash, height) {
   play.append("Click to play");
 
   example.append(play);
-  code.append(example);
 }
 </script>

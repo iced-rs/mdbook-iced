@@ -89,8 +89,6 @@ fn view(value: &u64) -> Column<Message> {
 ```
 ````
 
-You can control the height of the embedded application by using `iced(height=<CSS height>)` as a label (e.g. `iced(height=100px)`).
-
 Check out the [`book`](book) directory for a real mdBook example!
 
 [iced]: https://github.com/iced-rs/iced
